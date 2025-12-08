@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .animate-stamp {
+    animation: stamp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+}
+
+@keyframes stamp {
+  0% {
+    opacity: 0;
+    transform: scale(2) rotate(0deg);
+  }
+  100% {
+    opacity: 0.9;
+    transform: scale(1) rotate(-12deg);
+  }
+}
+
+
+/* NEW ANIMATION FOR LOGO: Straight, Solid, and Pop-Up */
+@keyframes pop-logo {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) translateY(50px); /* Starts small and hidden */
+  }
+  100% {
+    opacity: 1 !important; /* Forces 100% visibility */
+    transform: scale(1) translateY(0); /* Lands perfectly straight */
+  }
+}
+
+.animate-pop-logo {
+  animation: pop-logo 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+/* ... existing code ... */
+
+@keyframes pop-logo {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) translateY(50px);
+  }
+  100% {
+    opacity: 1 !important;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-pop-logo {
+  animation: pop-logo 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
