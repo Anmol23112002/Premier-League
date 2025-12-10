@@ -30,6 +30,9 @@ const SummaryPage: React.FC = () => {
   const [teamSummary, setTeamSummary] = useState<TeamSummary | null>(null);
   const [globalSummary, setGlobalSummary] = useState<GlobalSummary | null>(null);
 
+  // --- NEW: State for the Player Popup ---
+  const [viewPlayer, setViewPlayer] = useState<Player | null>(null);
+
   useEffect(() => {
     if (sets.length && !selectedSetId) setSelectedSetId(sets[0]._id);
   }, [sets, selectedSetId]);
@@ -129,8 +132,16 @@ const SummaryPage: React.FC = () => {
               </thead>
               <tbody className="bg-slate-900/40 divide-y divide-slate-800 text-lg">
                 {setPlayers.map((p) => (
-                  <tr key={p._id} className="hover:bg-slate-800/60 transition-colors">
-                    <td className="px-6 py-4 font-bold text-white text-xl">{p.name}</td>
+                  <tr key={p._id} className="hover:bg-slate-800/60 transition-colors group">
+                    <td className="px-6 py-4">
+                      {/* CLICKABLE NAME */}
+                      <button 
+                        onClick={() => setViewPlayer(p)}
+                        className="font-bold text-white text-xl hover:text-neon-green hover:underline decoration-neon-green underline-offset-4 text-left transition-all"
+                      >
+                        {p.name}
+                      </button>
+                    </td>
                     <td className="px-6 py-4 text-center">{getStatusBadge(p.auctionStatus)}</td>
                     <td className="px-6 py-4 text-right font-mono text-neon-green font-bold text-xl">
                       {p.soldPrice ? `₹ ${p.soldPrice}` : '-'}
@@ -203,8 +214,16 @@ const SummaryPage: React.FC = () => {
                   </thead>
                   <tbody className="bg-slate-900/40 divide-y divide-slate-800 text-lg">
                     {teamSummary.players.map((p) => (
-                      <tr key={p._id} className="hover:bg-slate-800/60 transition-colors">
-                        <td className="px-6 py-4 font-bold text-white text-xl">{p.name}</td>
+                      <tr key={p._id} className="hover:bg-slate-800/60 transition-colors group">
+                        <td className="px-6 py-4">
+                           {/* CLICKABLE NAME */}
+                           <button 
+                            onClick={() => setViewPlayer(p)}
+                            className="font-bold text-white text-xl hover:text-neon-green hover:underline decoration-neon-green underline-offset-4 text-left transition-all"
+                          >
+                            {p.name}
+                          </button>
+                        </td>
                         <td className="px-6 py-4 text-slate-300">{p.role ?? '-'}</td>
                         <td className="px-6 py-4 text-slate-400 text-sm uppercase tracking-wide">
                           {(p.playerSet as PlayerSet | undefined)?.name ?? '-'}
@@ -250,6 +269,89 @@ const SummaryPage: React.FC = () => {
           <div className="bg-slate-900/80 border border-slate-700 rounded-3xl p-8 shadow-xl flex flex-col items-center justify-center gap-2 border-neon-green/30 shadow-neon-green/10">
             <div className="text-slate-400 text-sm font-bold uppercase tracking-widest">Total Money Spent</div>
             <div className="text-5xl font-black text-neon-green">₹ {globalSummary.totalMoneySpent}</div>
+          </div>
+        </div>
+      )}
+
+      {/* --- PLAYER DETAIL MODAL --- */}
+      {viewPlayer && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in" onClick={() => setViewPlayer(null)}>
+          <div 
+            className="bg-slate-950 border border-neon-green/40 rounded-2xl max-w-3xl w-full overflow-hidden shadow-[0_0_60px_rgba(57,255,20,0.15)] relative flex flex-col md:flex-row animate-scale-up" 
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button 
+              onClick={() => setViewPlayer(null)}
+              className="absolute top-4 right-4 z-50 bg-black/50 hover:bg-red-500/80 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all border border-slate-600"
+            >
+              ✕
+            </button>
+
+            {/* Left: Image */}
+            <div className="w-full md:w-2/5 h-64 md:h-auto bg-slate-900 relative">
+              <img 
+                src={viewPlayer.photoUrl || 'https://via.placeholder.com/320x400.png?text=No+Image'} 
+                alt={viewPlayer.name}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">
+                 <span className="bg-neon-green text-black px-3 py-1 text-xs font-bold uppercase rounded-sm">
+                    {viewPlayer.role}
+                 </span>
+              </div>
+            </div>
+
+            {/* Right: Details */}
+            <div className="flex-1 p-8 flex flex-col justify-between">
+               <div>
+                  <h2 className="text-4xl font-black text-white mb-1 uppercase italic tracking-wider">{viewPlayer.name}</h2>
+                  <div className="text-slate-400 text-lg mb-6">Age: {viewPlayer.age ?? 'N/A'}</div>
+
+                  <div className="grid grid-cols-2 gap-4 text-sm mb-8">
+                     <div className="bg-slate-900 p-3 rounded-lg border border-slate-800">
+                        <div className="text-slate-500 uppercase text-xs font-bold">Batting</div>
+                        <div className="text-white font-semibold">{viewPlayer.battingStyle ?? '-'}</div>
+                     </div>
+                     <div className="bg-slate-900 p-3 rounded-lg border border-slate-800">
+                        <div className="text-slate-500 uppercase text-xs font-bold">Bowling</div>
+                        <div className="text-white font-semibold">{viewPlayer.bowlingStyle ?? '-'}</div>
+                     </div>
+                  </div>
+               </div>
+
+               {/* Sale Info Box */}
+               <div className="bg-slate-900/80 p-5 rounded-xl border border-slate-700">
+                  {viewPlayer.auctionStatus === 'Sold' ? (
+                    <div className="flex items-center justify-between">
+                       <div>
+                          <div className="text-emerald-400 text-xs font-bold uppercase mb-1">Sold To</div>
+                          <div className="text-white text-2xl font-bold leading-none">
+                            {(viewPlayer.soldToTeam as any)?.name ?? 'Unknown Team'}
+                          </div>
+                       </div>
+                       <div className="text-right">
+                          <div className="text-slate-500 text-xs font-bold uppercase mb-1">Price</div>
+                          <div className="text-neon-green text-3xl font-black">₹ {viewPlayer.soldPrice}</div>
+                       </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                       <div className="text-slate-400 text-sm font-semibold uppercase">Status</div>
+                       <div>{getStatusBadge(viewPlayer.auctionStatus)}</div>
+                    </div>
+                  )}
+                  {viewPlayer.auctionStatus === 'Sold' && (viewPlayer.soldToTeam as any)?.logoUrl && (
+                     <div className="mt-4 pt-4 border-t border-slate-800 flex justify-center">
+                        <img 
+                          src={(viewPlayer.soldToTeam as any).logoUrl} 
+                          alt="Team Logo" 
+                          className="h-16 object-contain opacity-80"
+                        />
+                     </div>
+                  )}
+               </div>
+            </div>
           </div>
         </div>
       )}
